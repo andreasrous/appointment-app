@@ -18,7 +18,7 @@ export const BackButton = ({ href, label }: BackButtonProps) => {
           <span>{parts[0]}</span>
           <Button
             variant="link"
-            className="font-normal pl-1 pr-0 underline underline-offset-4"
+            className="font-normal pl-1 pr-0 underline underline-offset-4 h-full"
             size="sm"
             asChild
           >
@@ -26,7 +26,7 @@ export const BackButton = ({ href, label }: BackButtonProps) => {
           </Button>
         </>
       ) : (
-        <Button variant="link" className="font-normal" size="sm" asChild>
+        <Button variant="link" className="font-normal h-full" size="sm" asChild>
           <Link href={href}>{label}</Link>
         </Button>
       )}
