@@ -27,7 +27,7 @@ export const CardWrapper = ({
 }: CardWrapperProps) => {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="gap-0">
         <Header label={headerLabel} />
       </CardHeader>
       <CardContent>{children}</CardContent>

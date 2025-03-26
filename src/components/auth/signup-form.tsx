@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
 import { signup } from "@/actions/signup";
+import { Loader2 } from "lucide-react";
 
 export const SignupForm = () => {
   const [error, setError] = useState<string | undefined>("");
@@ -109,6 +110,7 @@ export const SignupForm = () => {
           <FormError message={error} />
           <FormSuccess message={success} />
           <Button type="submit" disabled={isPending} className="w-full">
+            {isPending && <Loader2 className="size-4 animate-spin" />}
             Create account
           </Button>
         </form>
