@@ -30,3 +30,15 @@ export const apiAuthPrefix = "/api/auth";
  * @type {string}
  */
 export const DEFAULT_LOGIN_REDIRECT = "/settings";
+
+/**
+ * The default redirect path after logging out.
+ * @type {string}
+ */
+export const DEFAULT_LOGOUT_REDIRECT = "/";
+
+/**
+ * An array of routes that should be completely ignored by the middleware.
+ * @type {string[]}
+ */
+export const middlewareIgnoreRoutes = ["/api/uploadthing"];

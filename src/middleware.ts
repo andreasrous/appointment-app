@@ -7,6 +7,7 @@ import {
   authRoutes,
   publicRoutes,
   DEFAULT_LOGIN_REDIRECT,
+  middlewareIgnoreRoutes
 } from "@/lib/routes";
 
 const { auth } = NextAuth(authConfig);
@@ -18,6 +19,10 @@ export default auth((req) => {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
+  if (middlewareIgnoreRoutes.some((route) => nextUrl.pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
 
   if (isApiAuthRoute) {
     return NextResponse.next();

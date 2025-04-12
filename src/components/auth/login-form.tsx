@@ -5,15 +5,24 @@ import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 import { LoginSchema } from "@/schemas";
 import { login } from "@/actions/login";
 
-import { CardWrapper } from "@/components/auth/card-wrapper";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
+import { CardWrapper } from "@/components/auth/card-wrapper";
+
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 import {
   Form,
@@ -23,6 +32,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -57,26 +67,43 @@ export const LoginForm = () => {
       login(values)
         .then((data) => {
           if (data?.error) {
-            if (showTwoFactor) form.resetField("code");
-            else form.resetField("password");
-            setError(data?.error);
+            if (showTwoFactor) {
+              form.resetField("code");
+            } else {
+              form.resetField("password");
+            }
+            setError(data.error);
           }
-          if (data?.success) setSuccess(data?.success);
-          if (data?.twoFactor) setShowTwoFactor(true);
+
+          if (data?.success) {
+            setSuccess(data.success);
+          }
+
+          if (data?.twoFactor) {
+            setShowTwoFactor(true);
+          }
         })
-        .catch(() => {});
+        .catch((error) => {
+          if (!isRedirectError(error)) {
+            setError("Something went wrong!");
+          }
+        });
     });
   };
 
   return (
     <CardWrapper
       headerLabel="Welcome back"
-      backButtonLabel="Don't have an account? Sign up"
+      backButtonLabel={
+        showTwoFactor ? "Back to login" : "Don't have an account? Sign up"
+      }
       backButtonHref="/auth/signup"
-      showSocial
+      showSocial={!showTwoFactor}
+      showBackButton
+      onBackClick={showTwoFactor ? () => setShowTwoFactor(false) : undefined}
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-6">
             {showTwoFactor && (
               <FormField
@@ -86,11 +113,21 @@ export const LoginForm = () => {
                   <FormItem>
                     <FormLabel>Two Factor Code</FormLabel>
                     <FormControl>
-                      <Input
+                      <InputOTP
                         {...field}
                         disabled={isPending}
-                        placeholder="123456"
-                      />
+                        maxLength={6}
+                        pattern={REGEXP_ONLY_DIGITS}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

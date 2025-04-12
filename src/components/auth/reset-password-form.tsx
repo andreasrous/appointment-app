@@ -19,10 +19,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
-import { reset } from "@/actions/reset";
+import { resetPassword } from "@/actions/reset-password";
 import { Loader2 } from "lucide-react";
 
-export const ResetForm = () => {
+export const ResetPasswordForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
@@ -39,7 +39,7 @@ export const ResetForm = () => {
     setSuccess("");
 
     startTransition(() => {
-      reset(values).then((data) => {
+      resetPassword(values).then((data) => {
         setError(data?.error);
         setSuccess(data?.success);
       });
@@ -51,6 +51,7 @@ export const ResetForm = () => {
       headerLabel="Enter your email address and we will send you a link to reset your password"
       backButtonLabel="Back to login"
       backButtonHref="/auth/login"
+      showBackButton
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

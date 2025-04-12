@@ -1,15 +1,23 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface BackButtonProps {
   href: string;
   label: string;
+  onClick?: () => void;
 }
 
-export const BackButton = ({ href, label }: BackButtonProps) => {
+export const BackButton = ({ href, label, onClick }: BackButtonProps) => {
   const parts = label.split(/(?<=\?) /);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (onClick) {
+      e.preventDefault();
+      onClick();
+    }
+  };
 
   return (
     <div className="text-center text-sm w-full">
@@ -22,12 +30,21 @@ export const BackButton = ({ href, label }: BackButtonProps) => {
             size="sm"
             asChild
           >
-            <Link href={href}>{parts[1]}</Link>
+            <Link href={href} onClick={handleClick}>
+              {parts[1]}
+            </Link>
           </Button>
         </>
       ) : (
-        <Button variant="link" className="font-normal h-full" size="sm" asChild>
-          <Link href={href}>{label}</Link>
+        <Button
+          variant="link"
+          className="font-normal h-full"
+          size="sm"
+          asChild
+        >
+          <Link href={href} onClick={handleClick}>
+            {label}
+          </Link>
         </Button>
       )}
     </div>

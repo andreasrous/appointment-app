@@ -8,11 +8,13 @@ import { CardWrapper } from "./card-wrapper";
 import { newVerification } from "@/actions/new-verification";
 import { FormError } from "@/components/form/form-error";
 import { FormSuccess } from "@/components/form/form-success";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export const NewVerificationForm = () => {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
 
+  const user = useCurrentUser();
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token");
@@ -23,7 +25,7 @@ export const NewVerificationForm = () => {
       return;
     }
 
-    newVerification(token)
+    newVerification(token, user?.id)
       .then((data) => {
         setSuccess(data.success);
         setError(data.error);
@@ -31,7 +33,7 @@ export const NewVerificationForm = () => {
       .catch(() => {
         setError("Something went wrong!");
       });
-  }, [token]);
+  }, [token, user?.id]);
 
   useEffect(() => {
     onSubmit();
@@ -42,6 +44,7 @@ export const NewVerificationForm = () => {
       headerLabel="Confirming your verification"
       backButtonLabel="Back to login"
       backButtonHref="/auth/login"
+      showBackButton
     >
       <div className="flex items-center w-full justify-center">
         {!success && !error && <BeatLoader color="var(--primary)" />}

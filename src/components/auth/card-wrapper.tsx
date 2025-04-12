@@ -16,6 +16,8 @@ interface CardWrapperProps {
   backButtonLabel: string;
   backButtonHref: string;
   showSocial?: boolean;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
 }
 
 export const CardWrapper = ({
@@ -24,6 +26,8 @@ export const CardWrapper = ({
   backButtonLabel,
   backButtonHref,
   showSocial,
+  showBackButton,
+  onBackClick,
 }: CardWrapperProps) => {
   return (
     <Card>
@@ -36,9 +40,15 @@ export const CardWrapper = ({
           <Social />
         </CardFooter>
       )}
-      <CardFooter>
-        <BackButton label={backButtonLabel} href={backButtonHref} />
-      </CardFooter>
+      {showBackButton && (
+        <CardFooter>
+          <BackButton
+            label={backButtonLabel}
+            href={backButtonHref}
+            onClick={onBackClick}
+          />
+        </CardFooter>
+      )}
     </Card>
   );
 };

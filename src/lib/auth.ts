@@ -1,29 +1,12 @@
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { UserRole } from "@prisma/client";
 
 import { db } from "@/lib/db";
-import { getUserById } from "@/data/user";
 import authConfig from "@/lib/auth.config";
 
+import { getUserById } from "@/data/user";
+import { getAccountByUserId } from "@/data/account";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { JWT } from "next-auth/jwt";
-
-declare module "next-auth" {
-  interface Session {
-    user: {
-      role: string;
-    } & DefaultSession["user"];
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    role?: UserRole;
-  }
-}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
@@ -72,6 +55,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.role && session.user) {
         session.user.role = token.role;
       }
+
+      if (session.user) {
+        session.user.name = token.name;
+        if (token.email) {
+          session.user.email = token.email;
+        }
+        session.user.isOAuth = token.isOAuth;
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
+        session.user.image = token.image;
+      }
+
       return session;
     },
     async jwt({ token }) {
@@ -81,7 +75,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       if (!existingUser) return token;
 
+      const existingAccount = await getAccountByUserId(existingUser.id);
+
+      token.name = existingUser.name;
+      token.email = existingUser.email;
       token.role = existingUser.role;
+      token.isOAuth = !!existingAccount;
+      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+      token.image = existingUser.image;
+
       return token;
     },
   },

@@ -1,11 +1,16 @@
 "use client";
 
 import { z } from "zod";
+import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { CardWrapper } from "@/components/auth/card-wrapper";
+
 import { SignupSchema } from "@/schemas";
+import { signup } from "@/actions/signup";
+
+import { FormError } from "@/components/form/form-error";
+import { FormSuccess } from "@/components/form/form-success";
+import { CardWrapper } from "@/components/auth/card-wrapper";
 
 import {
   Form,
@@ -17,9 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FormError } from "@/components/form/form-error";
-import { FormSuccess } from "@/components/form/form-success";
-import { signup } from "@/actions/signup";
+
 import { Loader2 } from "lucide-react";
 
 export const SignupForm = () => {
@@ -54,9 +57,10 @@ export const SignupForm = () => {
       backButtonLabel="Already have an account? Sign in"
       backButtonHref="/auth/login"
       showSocial
+      showBackButton
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-6">
             <FormField
               control={form.control}
