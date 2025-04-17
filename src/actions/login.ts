@@ -4,15 +4,14 @@ import { z } from "zod";
 import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
 
-import { signIn } from "@/lib/auth";
-import { DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
-
 import { db } from "@/lib/db";
 import { getUserByEmail } from "@/data/user";
 import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 
+import { signIn } from "@/lib/auth";
 import { LoginSchema } from "@/schemas";
+import { DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
 
 import { sendVerificationEmail, sendTwoFactorTokenEmail } from "@/lib/mail";
 import {
@@ -20,7 +19,10 @@ import {
   generateTwoFactorToken,
 } from "@/lib/tokens";
 
-export const login = async (values: z.infer<typeof LoginSchema>) => {
+export const login = async (
+  values: z.infer<typeof LoginSchema>,
+  callbackUrl?: string | null
+) => {
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -101,7 +103,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {
     if (error instanceof AuthError) {

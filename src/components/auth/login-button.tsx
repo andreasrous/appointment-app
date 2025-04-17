@@ -1,31 +1,48 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { LoginForm } from "@/components/auth/login-form";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 interface LoginButtonProps {
   children: React.ReactNode;
   mode?: "modal" | "redirect";
-  asChild?: boolean;
+  className?: string;
 }
 
 export const LoginButton = ({
   children,
   mode = "redirect",
-  // asChild,
+  className,
 }: LoginButtonProps) => {
-  const router = useRouter();
+  const user = useCurrentUser();
 
-  const onClick = () => {
-    router.push("/auth/login");
-  };
-
-  if (mode === "modal") {
-    return <span>Todo: Implement modal</span>;
+  if (mode === "modal" && !user) {
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>{children}</Button>
+        </DialogTrigger>
+        <DialogContent className="p-0 w-sm bg-transparent border-none">
+          <DialogTitle className="sr-only" />
+          <DialogDescription className="sr-only" />
+          <LoginForm />
+        </DialogContent>
+      </Dialog>
+    );
   }
 
   return (
-    <span onClick={onClick} className="cursor-pointer">
+    <Link href="/auth/login" className={className}>
       {children}
-    </span>
+    </Link>
   );
 };

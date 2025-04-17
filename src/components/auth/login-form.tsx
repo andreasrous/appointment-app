@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Link from "next/link";
+import { getSession, signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
@@ -17,6 +18,7 @@ import { FormSuccess } from "@/components/form/form-success";
 import { CardWrapper } from "@/components/auth/card-wrapper";
 
 import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
 
 import {
   InputOTP,
@@ -35,11 +37,11 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
 import { Loader2 } from "lucide-react";
 
 export const LoginForm = () => {
   const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const urlError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "Email in use with another provider!"
@@ -64,7 +66,7 @@ export const LoginForm = () => {
     setSuccess("");
 
     startTransition(() => {
-      login(values)
+      login(values, callbackUrl)
         .then((data) => {
           if (data?.error) {
             if (showTwoFactor) {
@@ -83,8 +85,10 @@ export const LoginForm = () => {
             setShowTwoFactor(true);
           }
         })
-        .catch((error) => {
-          if (!isRedirectError(error)) {
+        .catch(async (error) => {
+          if (isRedirectError(error)) {
+            await getSession();
+          } else {
             setError("Something went wrong!");
           }
         });
@@ -93,14 +97,29 @@ export const LoginForm = () => {
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
+      headerLabel={
+        showTwoFactor
+          ? "We've sent a 6-digit code to your email. Enter it below to continue."
+          : "Welcome back"
+      }
       backButtonLabel={
         showTwoFactor ? "Back to login" : "Don't have an account? Sign up"
       }
       backButtonHref="/auth/signup"
       showSocial={!showTwoFactor}
       showBackButton
+      isPending={isPending}
       onBackClick={showTwoFactor ? () => setShowTwoFactor(false) : undefined}
+      onSocialClick={(provider) => {
+        setError("");
+        setSuccess("");
+
+        startTransition(async () => {
+          await signIn(provider, {
+            redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
+          });
+        });
+      }}
     >
       <Form {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>

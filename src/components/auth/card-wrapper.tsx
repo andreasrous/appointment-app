@@ -17,7 +17,9 @@ interface CardWrapperProps {
   backButtonHref: string;
   showSocial?: boolean;
   showBackButton?: boolean;
+  isPending?: boolean;
   onBackClick?: () => void;
+  onSocialClick?: (provider: "google" | "github") => void;
 }
 
 export const CardWrapper = ({
@@ -27,7 +29,9 @@ export const CardWrapper = ({
   backButtonHref,
   showSocial,
   showBackButton,
+  isPending,
   onBackClick,
+  onSocialClick,
 }: CardWrapperProps) => {
   return (
     <Card>
@@ -35,9 +39,9 @@ export const CardWrapper = ({
         <Header label={headerLabel} />
       </CardHeader>
       <CardContent>{children}</CardContent>
-      {showSocial && (
+      {showSocial && onSocialClick && (
         <CardFooter>
-          <Social />
+          <Social isPending={isPending} onClick={onSocialClick} />
         </CardFooter>
       )}
       {showBackButton && (

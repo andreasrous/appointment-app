@@ -5,6 +5,9 @@ import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { signIn } from "next-auth/react";
+import { DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
+
 import { SignupSchema } from "@/schemas";
 import { signup } from "@/actions/signup";
 
@@ -58,6 +61,17 @@ export const SignupForm = () => {
       backButtonHref="/auth/login"
       showSocial
       showBackButton
+      isPending={isPending}
+      onSocialClick={(provider) => {
+        setError("");
+        setSuccess("");
+
+        startTransition(async () => {
+          await signIn(provider, {
+            redirectTo: DEFAULT_LOGIN_REDIRECT,
+          });
+        });
+      }}
     >
       <Form {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>

@@ -7,7 +7,7 @@ import {
   authRoutes,
   publicRoutes,
   DEFAULT_LOGIN_REDIRECT,
-  middlewareIgnoreRoutes
+  middlewareIgnoreRoutes,
 } from "@/lib/routes";
 
 const { auth } = NextAuth(authConfig);
@@ -24,6 +24,10 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
+  if (nextUrl.pathname === "/business") {
+    return NextResponse.redirect(new URL("/business/overview", nextUrl));
+  }
+
   if (isApiAuthRoute) {
     return NextResponse.next();
   }
@@ -36,7 +40,13 @@ export default auth((req) => {
   }
 
   if (!isLoggedIn && !isPublicRoute) {
-    return Response.redirect(new URL("/auth/login", nextUrl));
+    const callbackUrl = encodeURIComponent(
+      `${nextUrl.pathname}${nextUrl.search || ""}`
+    );
+
+    return Response.redirect(
+      new URL(`/auth/login?callbackUrl=${callbackUrl}`, nextUrl)
+    );
   }
 
   return NextResponse.next();
