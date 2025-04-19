@@ -1,5 +1,7 @@
+import Calendar from "@/components/calendar/calendar";
+
 const CalendarPage = () => {
-  return <div>Calendar</div>;
+  return <Calendar />;
 };
 
 export default CalendarPage;

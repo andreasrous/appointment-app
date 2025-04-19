@@ -123,3 +123,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+* {
+  scrollbar-width: thin;
+}
+
+.sx-react-calendar-wrapper {
+  width: 100%;
+  height: 100%;
+}
