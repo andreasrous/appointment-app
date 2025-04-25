@@ -10,8 +10,6 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 
-import { Toaster } from "@/components/ui/sonner";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -44,7 +42,6 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
           {children}
-          <Toaster richColors />
         </SessionProvider>
       </body>
     </html>

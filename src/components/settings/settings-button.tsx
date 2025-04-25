@@ -32,7 +32,7 @@ export function SettingsButton() {
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle className="text-2xl">Settings</DialogTitle>
           <DialogDescription>Manage your account settings!</DialogDescription>
         </DialogHeader>
         <SettingsForm />

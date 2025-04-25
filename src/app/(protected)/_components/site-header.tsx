@@ -8,7 +8,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { usePathname } from "next/navigation";
-import { userNavigation } from "@/config/navigation";
 
 import {
   Breadcrumb,
@@ -65,7 +64,7 @@ export function SiteHeader() {
       </div>
       <div className="flex items-center gap-4 px-4">
         <ThemeToggle />
-        <UserMenu user={user} navigation={userNavigation} />
+        <UserMenu user={user} />
       </div>
     </header>
   );

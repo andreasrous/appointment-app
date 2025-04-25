@@ -1,5 +1,8 @@
 :root,
 .is-dark {
+  /* Light theme */
+  --border-light: hsla(224, 71%, 4%, 0.14);
+
   /* Primary colors */
   --sx-color-primary: var(--primary);
   --sx-color-on-primary: var(--primary-foreground);
@@ -32,9 +35,9 @@
   --sx-color-on-background: var(--foreground);
 
   /* Utility colors */
-  --sx-color-outline: var(--border);
-  --sx-color-outline-variant: var(--border);
-  --sx-color-shadow: var(--border);
+  --sx-color-outline: var(--border-light);
+  --sx-color-outline-variant: var(--border-light);
+  --sx-color-shadow: var(--border-light);
   --sx-color-surface-tint: var(--primary);
 
   /* Neutral colors */
@@ -60,16 +63,27 @@
   --sx-spacing-modal-padding: 14px;
 }
 
+:root {
+  --my-border: var(--border-light);
+}
+
+.is-dark {
+  --my-border: var(--border);
+  --sx-color-outline: var(--border);
+  --sx-color-outline-variant: var(--border);
+  --sx-color-shadow: var(--border);
+}
+
 .sx-react-calendar-wrapper {
-  width: 100%;
-  max-width: 100%;
-  /* spacing.20 is because the header is spacing.16 + spacing.4 for sidebar padding */
-  height: calc(100svh - theme(spacing.20));
-  margin: 0;
+  width: calc(100% + 2rem);
+  max-width: calc(100% + 2rem);
+  height: calc(100% + 2rem);
+  margin: -1rem;
 }
 
 .sx__calendar {
   border: none;
+  padding: 1rem;
 }
 
 .sx__today-button {
@@ -90,7 +104,7 @@
   margin-top: 10px;
   box-shadow: none;
   border-width: 1px;
-  border-color: var(--border);
+  border-color: var(--my-border);
 }
 
 .sx__date-picker-popup {
@@ -99,7 +113,7 @@
   margin-top: 10px;
   box-shadow: none;
   border-width: 1px;
-  border-color: var(--border);
+  border-color: var(--my-border);
 }
 
 .sx__date-picker__month-view-header__month-year {
@@ -122,7 +136,7 @@
   overflow: hidden;
   box-shadow: none;
   border-width: 1px;
-  border-color: var(--border);
+  border-color: var(--my-border);
 }
 
 .sx__event-modal__color-icon {

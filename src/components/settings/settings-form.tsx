@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -8,9 +10,13 @@ import { useSession } from "next-auth/react";
 import { useState, useTransition } from "react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
+import { UserRole } from "@prisma/client";
 import { SettingsSchema } from "@/schemas";
 import { settings } from "@/actions/settings";
 
+import { Loader2, X } from "lucide-react";
+
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -32,11 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import Image from "next/image";
-import { UserRole } from "@prisma/client";
 import { UploadDropzone } from "@/lib/uploadthing";
-import { Loader2, X } from "lucide-react";
-import { toast } from "sonner";
 
 export const SettingsForm = () => {
   const user = useCurrentUser();
@@ -101,8 +103,8 @@ export const SettingsForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="John Doe"
                     disabled={isPending}
+                    placeholder="John Doe"
                   />
                 </FormControl>
                 <FormMessage />
@@ -200,8 +202,8 @@ export const SettingsForm = () => {
               control={form.control}
               name="isTwoFactorEnabled"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-xs">
-                  <div className="flex flex-col gap-1.5 space-y-0 5">
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-xs">
+                  <div className="flex flex-col gap-1.5">
                     <FormLabel>Two Factor Authentication</FormLabel>
                     <FormDescription>
                       Enable two factor authentication for your account
@@ -247,8 +249,7 @@ export const SettingsForm = () => {
                         variant="destructive"
                         size="icon"
                         type="button"
-                        className="absolute -top-0.5 -right-1.5 size-6 rounded-full border-2 border-background
-                                 bg-red-700 hover:bg-red-700/80 dark:bg-red-950 dark:hover:bg-red-900/70"
+                        className="absolute -top-0.5 -right-1.5 size-6 rounded-full border-2 border-background"
                       >
                         <X className="size-3" />
                       </Button>
