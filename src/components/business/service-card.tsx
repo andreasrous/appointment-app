@@ -57,7 +57,7 @@ export const ServiceCard = ({
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="min-w-3xs relative overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="absolute top-2 right-2">
         <Button
           variant="ghost"

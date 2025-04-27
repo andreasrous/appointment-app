@@ -1,5 +1,17 @@
+import { startOfDay } from "date-fns";
 import { Day, UserRole } from "@prisma/client";
 import { z } from "zod";
+
+export const BookingSchema = z.object({
+  description: z.optional(
+    z.string().max(500, "Description is too long").nullable()
+  ),
+  startTime: z.date().min(new Date()),
+  date: z.date().min(startOfDay(new Date()), "Must be in the future"),
+  businessId: z.string(),
+  serviceId: z.string(),
+  employeeId: z.string(),
+});
 
 export const EmployeeSchema = z.object({
   name: z

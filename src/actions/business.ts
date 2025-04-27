@@ -107,3 +107,49 @@ export const deleteBusiness = async (id: string) => {
     return { error: "Failed to delete business." };
   }
 };
+
+export const addToFavorites = async (businessId: string) => {
+  const user = await getCurrentUser();
+
+  if (!user?.id) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    await db.favorite.create({
+      data: {
+        userId: user.id,
+        businessId,
+      },
+    });
+
+    revalidatePath("/");
+    return { success: "Business favorited!" };
+  } catch {
+    return { error: "Failed to favorite business." };
+  }
+};
+
+export const removeFromFavorites = async (businessId: string) => {
+  const user = await getCurrentUser();
+
+  if (!user?.id) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    await db.favorite.delete({
+      where: {
+        userId_businessId: {
+          userId: user.id,
+          businessId,
+        },
+      },
+    });
+
+    revalidatePath("/");
+    return { success: "Business unfavorited!" };
+  } catch {
+    return { error: "Failed to unfavorite business." };
+  }
+};
