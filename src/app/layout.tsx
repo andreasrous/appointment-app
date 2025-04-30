@@ -9,6 +9,7 @@ import { siteConfig } from "@/config/site";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
+import { SessionRefresher } from "@/components/auth/session-refresher";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,6 +42,7 @@ export default async function RootLayout({
       >
         <SessionProvider session={session}>
           <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+          <SessionRefresher />
           {children}
         </SessionProvider>
       </body>

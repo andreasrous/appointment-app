@@ -40,6 +40,8 @@ model User {
   role                  UserRole               @default(USER)
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
+  grantId               String?
+  grantEmail            String?
   image                 String?
   accounts              Account[]
 
@@ -182,15 +184,14 @@ model EmployeeService {
 }
 
 model Appointment {
-  id                 String   @id @default(cuid())
-  title              String
-  description        String?
-  location           String?
-  startTime          DateTime
-  endTime            DateTime
-  status             Status   @default(PENDING)
-  googleEventId      String?  @unique
-  isOnGoogleCalendar Boolean  @default(false)
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  location        String?
+  startTime       DateTime
+  endTime         DateTime
+  status          Status   @default(CONFIRMED)
+  calendarEventId String   @unique
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

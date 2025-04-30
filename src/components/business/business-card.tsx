@@ -68,7 +68,7 @@ export const BusinessCard = ({
         </div>
         <Button variant="ghost" size="icon" onClick={handleFavoriteClick}>
           {isFavorited ? (
-            <FaBookmark className="size-5 text-yellow-500" />
+            <FaBookmark className="size-5 text-yellow-500 dark:text-yellow-400" />
           ) : (
             <FaRegBookmark className="size-5 text-muted-foreground" />
           )}
@@ -90,7 +90,7 @@ export const BusinessCard = ({
             <div className="truncate">{business.address}</div>
           )}
         </div>
-        <Link href={`/book/${business.id}`}>
+        <Link href={`/booking/${business.id}`}>
           <Button size="sm">Book</Button>
         </Link>
       </div>

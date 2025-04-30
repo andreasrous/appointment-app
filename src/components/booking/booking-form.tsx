@@ -4,13 +4,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { cn } from "@/lib/utils";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 import { BookingSchema } from "@/schemas";
-import { createBooking } from "@/actions/booking";
+import { createBooking, getValidTimes } from "@/actions/booking";
 
-import { Business, Employee, Service } from "@prisma/client";
+import { Availability, Business, Employee, Service } from "@prisma/client";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -49,20 +50,25 @@ import {
 } from "@/components/ui/popover";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface BookingFormProps {
   business: Business;
   services: Service[];
+  availabilities: Availability[];
   employeesByService: Record<string, Employee[]>;
 }
 
 export const BookingForm = ({
   business,
   services,
+  availabilities,
   employeesByService,
 }: BookingFormProps) => {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  const [availableTimes, setAvailableTimes] = useState<Date[]>([]);
 
   const form = useForm<z.infer<typeof BookingSchema>>({
     resolver: zodResolver(BookingSchema),
@@ -76,6 +82,8 @@ export const BookingForm = ({
     },
   });
 
+  const selectedDate = form.watch("date");
+
   const employeesForSelectedService =
     employeesByService[selectedServiceId] || [];
 
@@ -83,6 +91,40 @@ export const BookingForm = ({
     () => services.find((service) => service.id === selectedServiceId),
     [services, selectedServiceId]
   );
+
+  useEffect(() => {
+    const getAvailableTimes = async () => {
+      if (!selectedDate) return;
+      const freeSlots = await getValidTimes(
+        selectedDate,
+        business.id,
+        selectedService?.duration as number
+      );
+
+      setAvailableTimes(freeSlots);
+    };
+
+    getAvailableTimes();
+  }, [selectedDate, business.id, selectedService?.duration]);
+
+  const isDateUnavailable = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (date < today) {
+      return true;
+    }
+
+    const dayOfWeek = date.getDay();
+    const adjustedIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const isActive = availabilities[adjustedIndex].isActive;
+
+    if (!isActive) {
+      return true;
+    }
+
+    return false;
+  };
 
   const formatDate = (date: Date) => {
     const dateFormatter = new Intl.DateTimeFormat(undefined, {
@@ -99,6 +141,8 @@ export const BookingForm = ({
       ])
     ) as z.infer<typeof BookingSchema>;
 
+    console.log(values.employeeId);
+
     startTransition(() => {
       createBooking(processedValues)
         .then((data) => {
@@ -107,7 +151,7 @@ export const BookingForm = ({
           }
 
           if (data.success) {
-            toast.success(data.success);
+            router.push("/booking/success");
           }
         })
         .catch(() => toast.error("Something went wrong!"));
@@ -118,7 +162,7 @@ export const BookingForm = ({
     <div className="flex w-full h-full flex-1 items-center justify-center">
       <Card className="w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Book an appointment</CardTitle>
+          <CardTitle className="text-2xl">Book your appointment</CardTitle>
           <CardDescription>
             Fill in the form to confirm your appointment.
           </CardDescription>
@@ -138,7 +182,6 @@ export const BookingForm = ({
                         onValueChange={(value) => {
                           field.onChange(value);
                           setSelectedServiceId(value);
-                          form.setValue("employeeId", "");
                         }}
                         value={field.value}
                       >
@@ -196,7 +239,7 @@ export const BookingForm = ({
                     </FormItem>
                   )}
                 />
-                <div className="flex gap-4 flex-col sm:flex-row">
+                <div className="flex gap-4 flex-col sm:flex-row items-start">
                   <FormField
                     control={form.control}
                     name="date"
@@ -208,6 +251,7 @@ export const BookingForm = ({
                             <FormControl>
                               <Button
                                 variant={"outline"}
+                                disabled={isPending || !selectedServiceId}
                                 className={cn(
                                   "w-full flex pl-3 text-left font-normal",
                                   !field.value && "text-muted-foreground"
@@ -227,13 +271,7 @@ export const BookingForm = ({
                               mode="single"
                               selected={field.value}
                               onSelect={field.onChange}
-                              disabled={
-                                (date) =>
-                                  date > new Date() ||
-                                  date < new Date("1900-01-01")
-                                // TODO: validTimes
-                              }
-                              initialFocus
+                              disabled={(date) => isDateUnavailable(date)}
                             />
                           </PopoverContent>
                         </Popover>
@@ -250,7 +288,7 @@ export const BookingForm = ({
                         <Select
                           disabled={isPending || !form.watch("date")}
                           onValueChange={(value) =>
-                            field.onChange(new Date(Date.parse(value)))
+                            field.onChange(new Date(value))
                           }
                           defaultValue={field.value?.toISOString()}
                         >
@@ -260,7 +298,25 @@ export const BookingForm = ({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectGroup>{/* TODO */}</SelectGroup>
+                            <SelectGroup>
+                              {availableTimes.length > 0 ? (
+                                availableTimes.map((time) => (
+                                  <SelectItem
+                                    key={time.toISOString()}
+                                    value={time.toISOString()}
+                                  >
+                                    {time.toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <SelectLabel>
+                                  No free slots available
+                                </SelectLabel>
+                              )}
+                            </SelectGroup>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -287,14 +343,10 @@ export const BookingForm = ({
                   )}
                 />
               </div>
-              <div className="flex gap-2 justify-between">
-                <Link href="/search">
-                  <Button variant="outline" type="button" disabled={isPending}>
-                    Cancel
-                  </Button>
-                </Link>
-                <div className="flex gap-2 items-center">
-                  {selectedService && (
+              <div className="flex gap-2 justify-end">
+                <Button type="submit" disabled={isPending}>
+                  {isPending && <Loader2 className="size-4 animate-spin" />}
+                  {selectedService ? (
                     <span>
                       {selectedService.price.toLocaleString("el-GR", {
                         minimumFractionDigits: 2,
@@ -302,12 +354,19 @@ export const BookingForm = ({
                       })}
                       €
                     </span>
+                  ) : (
+                    <span>Book</span>
                   )}
-                  <Button type="submit" disabled={isPending}>
-                    {isPending && <Loader2 className="size-4 animate-spin" />}
-                    Book
+                </Button>
+                <Link href="/search">
+                  <Button
+                    variant="destructive"
+                    type="button"
+                    disabled={isPending}
+                  >
+                    Cancel
                   </Button>
-                </div>
+                </Link>
               </div>
             </form>
           </Form>

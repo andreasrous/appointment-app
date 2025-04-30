@@ -8,6 +8,8 @@ export type ExtendedUser = DefaultSession["user"] & {
   role: UserRole;
   isTwoFactorEnabled: boolean;
   isOAuth: boolean;
+  grantId: string | null;
+  grantEmail: string | null;
   image: string | null;
 };
 
@@ -22,6 +24,8 @@ declare module "next-auth/jwt" {
     role?: UserRole;
     isTwoFactorEnabled: boolean;
     isOAuth: boolean;
+    grantId: string | null;
+    grantEmail: string | null;
     image: string | null;
   }
 }

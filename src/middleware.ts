@@ -3,24 +3,61 @@ import { NextResponse } from "next/server";
 import authConfig from "@/lib/auth.config";
 
 import {
-  apiAuthPrefix,
   authRoutes,
   publicRoutes,
-  DEFAULT_LOGIN_REDIRECT,
+  onboardingRoutes,
+  apiAuthPrefix,
   middlewareIgnoreRoutes,
+  DEFAULT_LOGIN_REDIRECT,
 } from "@/lib/routes";
 
 const { auth } = NextAuth(authConfig);
 
-export default auth((req) => {
+export default auth(async (req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  const grantId = !!req.auth?.user.grantId;
+
+  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const isOnboardingRoute = onboardingRoutes.includes(nextUrl.pathname);
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isMiddlewareIgnoreRoute =
+    middlewareIgnoreRoutes.includes(nextUrl.pathname) ||
+    nextUrl.searchParams.get("bypass") === "true";
 
-  if (middlewareIgnoreRoutes.some((route) => nextUrl.pathname.startsWith(route))) {
+  const bypassCookie = req.cookies.get("bypass");
+
+  const needsOnboarding =
+    isLoggedIn &&
+    !grantId &&
+    !bypassCookie &&
+    !isApiAuthRoute &&
+    !isPublicRoute &&
+    !isOnboardingRoute;
+
+  if (isMiddlewareIgnoreRoute) {
+    if (nextUrl.searchParams.has("bypass")) {
+      const cleanedUrl = new URL(nextUrl.pathname, nextUrl);
+      cleanedUrl.searchParams.delete("bypass");
+
+      const res = NextResponse.redirect(cleanedUrl);
+      res.cookies.set("bypass", "true", { path: "/", maxAge: 10 });
+      return res;
+    }
+
+    return NextResponse.next();
+  }
+
+  if (needsOnboarding) {
+    return NextResponse.redirect(new URL("/onboarding", nextUrl));
+  }
+
+  if (isLoggedIn && isOnboardingRoute) {
+    if (grantId) {
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+    }
     return NextResponse.next();
   }
 
@@ -34,7 +71,7 @@ export default auth((req) => {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
     return NextResponse.next();
   }
@@ -44,7 +81,7 @@ export default auth((req) => {
       `${nextUrl.pathname}${nextUrl.search || ""}`
     );
 
-    return Response.redirect(
+    return NextResponse.redirect(
       new URL(`/auth/login?callbackUrl=${callbackUrl}`, nextUrl)
     );
   }

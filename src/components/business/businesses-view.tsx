@@ -42,7 +42,7 @@ export const BusinessesView = ({ businesses }: SearchBusinessesClientProps) => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
+        <div className="text-center">
           <p className="text-muted-foreground">No businesses found</p>
         </div>
       )}

@@ -16,7 +16,18 @@ import "@/styles/schedule-x-theme.css";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 
-export default function Calendar() {
+type CalendarProps = {
+  initialEvents: {
+    id: string | number;
+    title: string;
+    description: string | undefined;
+    location: string | undefined;
+    start: string;
+    end: string;
+  }[];
+};
+
+export default function Calendar({ initialEvents }: CalendarProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
@@ -26,48 +37,7 @@ export default function Calendar() {
   const calendar = useNextCalendarApp({
     views: [viewDay, viewWeek, viewMonthGrid, viewMonthAgenda],
     defaultView: viewWeek.name,
-    events: [
-      {
-        id: 1,
-        title: "Coffee with John",
-        start: "2025-05-01",
-        end: "2025-05-01",
-      },
-      {
-        id: 2,
-        title: "Breakfast with Sam",
-        description: "Discuss the new project",
-        location: "Starbucks",
-        start: "2025-04-29 05:00",
-        end: "2025-04-29 06:00",
-      },
-      {
-        id: 3,
-        title: "Gym",
-        start: "2025-04-27 06:00",
-        end: "2025-04-27 07:00",
-      },
-      {
-        id: 4,
-        title: "Media fasting",
-        start: "2025-05-01",
-        end: "2025-05-03",
-      },
-      {
-        id: 5,
-        title: "Some appointment",
-        people: ["John"],
-        start: "2025-05-03 03:00",
-        end: "2025-05-03 04:30",
-      },
-      {
-        id: 6,
-        title: "Other appointment",
-        people: ["Susan", "Mike"],
-        start: "2025-05-03 03:00",
-        end: "2025-05-03 04:00",
-      },
-    ],
+    events: initialEvents,
     plugins: [eventsService, eventModal],
     callbacks: {
       onRender: () => {

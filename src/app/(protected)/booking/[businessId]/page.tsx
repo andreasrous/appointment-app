@@ -6,6 +6,7 @@ import { Employee } from "@prisma/client";
 import { BookingForm } from "@/components/booking/booking-form";
 import { getBusinessById } from "@/data/business";
 import { getServicesWithEmployeesByBusinessId } from "@/data/service";
+import { getAvailabilitiesByBusinessId } from "@/data/availability";
 
 interface BookingPageProps {
   params: { businessId: string };
@@ -15,8 +16,9 @@ const BookingPage = async ({ params }: BookingPageProps) => {
   const { businessId } = await params;
   const business = await getBusinessById(businessId);
   const services = await getServicesWithEmployeesByBusinessId(businessId);
+  const availabilities = await getAvailabilitiesByBusinessId(businessId);
 
-  if (!business || !services) {
+  if (!business || !services || !availabilities) {
     return notFound();
   }
 
@@ -35,6 +37,7 @@ const BookingPage = async ({ params }: BookingPageProps) => {
       <BookingForm
         business={business}
         services={services}
+        availabilities={availabilities}
         employeesByService={employeesByService}
       />
     </motion.div>

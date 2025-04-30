@@ -18,14 +18,24 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-function formatSegment(segment: string): string {
+function formatSegment(segment: string, businessName?: string): string {
+  const isId = /^[a-f\d]{24}$|^[\w-]{36}$|^c[a-z0-9]{24}$/i.test(segment);
+
+  if (isId) {
+    return businessName || "Form";
+  }
+
   return segment
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
 
-export function SiteHeader() {
+interface SiteHeaderProps {
+  businessName?: string;
+}
+
+export function SiteHeader({ businessName }: SiteHeaderProps) {
   const user = useCurrentUser();
   const pathname = usePathname();
 
@@ -33,7 +43,7 @@ export function SiteHeader() {
 
   const breadcrumbItems = segments.map((segment, index) => {
     const href = "/" + segments.slice(0, index + 1).join("/");
-    const label = formatSegment(segment);
+    const label = formatSegment(segment, businessName);
     const isLast = index === segments.length - 1;
 
     return (

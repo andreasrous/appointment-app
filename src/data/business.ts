@@ -19,6 +19,19 @@ export const getBusinessByOwnerId = async (ownerId: string) => {
   }
 };
 
+export const getBusinessNameById = async (id: string) => {
+  try {
+    const business = await db.business.findUnique({
+      where: { id },
+      select: { name: true },
+    });
+
+    return business?.name;
+  } catch {
+    return null;
+  }
+};
+
 export const getAllBusinesses = async () => {
   try {
     const user = await getCurrentUser();

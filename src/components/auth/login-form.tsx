@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import Link from "next/link";
 import { getSession, signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 import { LoginSchema } from "@/schemas";
@@ -40,6 +40,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 export const LoginForm = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
   const urlError =
@@ -87,6 +88,7 @@ export const LoginForm = () => {
         })
         .catch(async (error) => {
           if (isRedirectError(error)) {
+            router.refresh();
             await getSession();
           } else {
             setError("Something went wrong!");

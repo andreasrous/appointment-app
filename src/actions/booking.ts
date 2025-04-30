@@ -2,9 +2,21 @@
 
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { Day } from "@prisma/client";
 
 import { BookingSchema } from "@/schemas";
 import { getCurrentUser } from "@/lib/user";
+import {
+  addMinutes,
+  format,
+  fromUnixTime,
+  isAfter,
+  isBefore,
+  parse,
+} from "date-fns";
+import { nylas } from "@/lib/nylas";
+import { GetFreeBusyResponse, NylasResponse } from "nylas";
+import { getBusinessById } from "@/data/business";
 
 export const createBooking = async (values: z.infer<typeof BookingSchema>) => {
   const validatedFields = BookingSchema.safeParse(values);
@@ -15,15 +27,214 @@ export const createBooking = async (values: z.infer<typeof BookingSchema>) => {
 
   const user = await getCurrentUser();
 
-  const { ...appointmentData } = validatedFields.data;
+  if (!user?.id) {
+    return { error: "Unauthorized" };
+  }
+
+  const { serviceId, businessId, employeeId, startTime, description } =
+    validatedFields.data;
 
   try {
-    // TODO
+    const service = await db.service.findUnique({
+      where: { id: serviceId },
+    });
 
-    return {
-      success: "Appointment booked!",
-    };
+    if (!service) {
+      return { error: "Service not found." };
+    }
+
+    const endTime = new Date(startTime);
+    endTime.setMinutes(endTime.getMinutes() + service.duration);
+
+    const business = await getBusinessById(businessId);
+
+    const businessOwner = await db.user.findUnique({
+      where: {
+        id: business?.ownerId,
+      },
+      select: {
+        grantId: true,
+        grantEmail: true,
+      },
+    });
+
+    const nylasEvent = await nylas.events.create({
+      identifier: businessOwner?.grantId as string,
+      requestBody: {
+        title: service.name,
+        description: description ?? undefined,
+        when: {
+          startTime: Math.floor(startTime.getTime() / 1000),
+          endTime: Math.floor(endTime.getTime() / 1000),
+        },
+        participants: [
+          {
+            name: user.name ?? undefined,
+            email: user.email!,
+            status: "yes",
+          },
+        ],
+      },
+      queryParams: {
+        calendarId: businessOwner?.grantEmail as string,
+        notifyParticipants: true,
+      },
+    });
+
+    await db.appointment.create({
+      data: {
+        title: service.name,
+        description: description,
+        location: business?.address,
+        startTime,
+        endTime,
+        userId: user.id,
+        businessId,
+        serviceId,
+        employeeId,
+        calendarEventId: nylasEvent.data.id,
+      },
+    });
+
+    return { success: "Appointment booked!" };
   } catch {
     return { error: "Failed to book appointment." };
   }
 };
+
+export const getValidTimes = async (
+  selectedDate: Date,
+  businessId: string,
+  duration: number
+) => {
+  const currentDay = format(
+    selectedDate,
+    "EEEE"
+  ).toUpperCase() as keyof typeof Day;
+
+  const startOfDay = new Date(selectedDate);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(selectedDate);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const data = await db.availability.findFirst({
+    where: {
+      dayOfWeek: currentDay,
+      businessId,
+    },
+    select: {
+      startTime: true,
+      endTime: true,
+      id: true,
+      business: {
+        select: {
+          owner: {
+            select: {
+              grantId: true,
+              grantEmail: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const grantId = data?.business.owner.grantId as string;
+  const grantEmail = data?.business.owner.grantEmail as string;
+
+  const nylasData = await nylas.calendars.getFreeBusy({
+    identifier: grantId,
+    requestBody: {
+      startTime: Math.floor(startOfDay.getTime() / 1000),
+      endTime: Math.floor(endOfDay.getTime() / 1000),
+      emails: [grantEmail],
+    },
+  });
+
+  const formattedDate = format(selectedDate, "yyyy-MM-dd");
+  const dbAvailability = {
+    startTime: data?.startTime,
+    endTime: data?.endTime,
+  };
+
+  const freeSlots = getFreeTimeSlots({
+    selectedDate: formattedDate,
+    dbAvailability,
+    nylasData,
+    duration,
+  });
+
+  return freeSlots;
+};
+
+interface getFreeTimeSlotsProps {
+  selectedDate: string;
+  dbAvailability: {
+    startTime: string | undefined;
+    endTime: string | undefined;
+  };
+  nylasData: NylasResponse<GetFreeBusyResponse[]>;
+  duration: number;
+}
+
+function getFreeTimeSlots({
+  selectedDate,
+  dbAvailability,
+  nylasData,
+  duration,
+}: getFreeTimeSlotsProps) {
+  const now = new Date();
+
+  const availableFrom = parse(
+    `${selectedDate} ${dbAvailability.startTime}`,
+    "yyyy-MM-dd HH:mm",
+    new Date()
+  );
+
+  const availableTill = parse(
+    `${selectedDate} ${dbAvailability.endTime}`,
+    "yyyy-MM-dd HH:mm",
+    new Date()
+  );
+
+  type MyFreeBusyResponse = {
+    email: string;
+    object: "free_busy";
+    timeSlots: {
+      startTime: number;
+      endTime: number;
+    }[];
+  };
+
+  const busySlots = (nylasData.data[0] as MyFreeBusyResponse).timeSlots.map(
+    (slot: { startTime: number; endTime: number }) => ({
+      start: fromUnixTime(slot.startTime),
+      end: fromUnixTime(slot.endTime),
+    })
+  );
+
+  const allSlots = [];
+  let currentSlot = availableFrom;
+
+  while (isBefore(currentSlot, availableTill)) {
+    allSlots.push(currentSlot);
+    currentSlot = addMinutes(currentSlot, 30);
+  }
+
+  const freeSlots = allSlots.filter((slot) => {
+    const slotEnd = addMinutes(slot, duration);
+
+    return (
+      isAfter(slot, now) &&
+      !busySlots.some(
+        (busy: { start: Date; end: Date }) =>
+          (!isBefore(slot, busy.start) && isBefore(slot, busy.end)) ||
+          (isAfter(slotEnd, busy.start) && !isAfter(slotEnd, busy.end)) ||
+          (isBefore(slot, busy.start) && isAfter(slotEnd, busy.end))
+      )
+    );
+  });
+
+  return freeSlots;
+}
