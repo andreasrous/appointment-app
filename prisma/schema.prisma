@@ -25,9 +25,8 @@ enum Day {
 }
 
 enum Status {
-  PENDING
   CONFIRMED
-  CANCELLED
+  CANCELED
   COMPLETED
 }
 

@@ -21,7 +21,7 @@ export const ServicesView = ({ services, employees }: ServiceViewProps) => {
         </div>
         <AddService employees={employees} />
       </div>
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
         {services?.map((item) => (
           <ServiceCard
             initialService={item}

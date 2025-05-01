@@ -250,11 +250,18 @@ export const BookingForm = ({
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                                variant={"outline"}
-                                disabled={isPending || !selectedServiceId}
+                                variant="outline"
+                                disabled={
+                                  isPending ||
+                                  !selectedServiceId ||
+                                  !form.watch("employeeId")
+                                }
                                 className={cn(
                                   "w-full flex pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
+                                  !field.value && "text-muted-foreground",
+                                  "transition-[color,box-shadow]",
+                                  "disabled:pointer-events-auto disabled:cursor-not-allowed disabled:hover:bg-background disabled:hover:text-muted-foreground",
+                                  "dark:aria-invalid:border-destructive"
                                 )}
                               >
                                 {field.value ? (

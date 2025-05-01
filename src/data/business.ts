@@ -55,3 +55,19 @@ export const getAllBusinesses = async () => {
     return null;
   }
 };
+
+export const getFavoriteBusinesses = async () => {
+  const user = await getCurrentUser();
+
+  const favorites = await db.favorite.findMany({
+    where: { userId: user?.id },
+    include: {
+      business: true,
+    },
+  });
+
+  return favorites.map((fav) => ({
+    ...fav.business,
+    isFavorited: true,
+  }));
+};

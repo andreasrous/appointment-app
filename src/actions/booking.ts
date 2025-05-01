@@ -102,6 +102,55 @@ export const createBooking = async (values: z.infer<typeof BookingSchema>) => {
   }
 };
 
+export const cancelAppointment = async (id: string) => {
+  try {
+    const appointment = await db.appointment.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        calendarEventId: true,
+        business: {
+          select: {
+            owner: {
+              select: {
+                grantId: true,
+                grantEmail: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!appointment) {
+      return { error: "Appointment not found." };
+    }
+
+    const grantId = appointment.business.owner.grantId as string;
+    const grantEmail = appointment.business.owner.grantEmail as string;
+    const calendarEventId = appointment.calendarEventId;
+
+    await nylas.events.destroy({
+      identifier: grantId,
+      eventId: calendarEventId,
+      queryParams: {
+        calendarId: grantEmail,
+        notifyParticipants: true,
+      },
+    });
+
+    await db.appointment.update({
+      where: { id },
+      data: { status: "CANCELED" },
+    });
+
+    return { success: "Appointment canceled." };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to cancel appointment." };
+  }
+};
+
 export const getValidTimes = async (
   selectedDate: Date,
   businessId: string,

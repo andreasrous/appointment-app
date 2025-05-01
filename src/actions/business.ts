@@ -123,7 +123,7 @@ export const addToFavorites = async (businessId: string) => {
       },
     });
 
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     return { success: "Business favorited!" };
   } catch {
     return { error: "Failed to favorite business." };
@@ -147,7 +147,7 @@ export const removeFromFavorites = async (businessId: string) => {
       },
     });
 
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     return { success: "Business unfavorited!" };
   } catch {
     return { error: "Failed to unfavorite business." };
