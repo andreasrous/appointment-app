@@ -47,6 +47,7 @@ model User {
   business           Business?
   appointments       Appointment[]
   favoriteBusinesses Favorite[]
+  conversationMember ConversationMember[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -216,4 +217,53 @@ model Favorite {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@unique([userId, businessId])
+}
+
+model Conversation {
+  id            String   @id @default(cuid())
+  lastMessageId String?  @unique
+  lastMessage   Message? @relation("ConversationLastMessage", fields: [lastMessageId], references: [id], onDelete: SetNull)
+
+  members  ConversationMember[]
+  messages Message[]            @relation("ConversationMessages")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ConversationMember {
+  id                String  @id @default(cuid())
+  conversationId    String
+  memberId          String
+  lastSeenMessageId String?
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  member          User         @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  lastSeenMessage Message?     @relation("MemberLastSeenMessage", fields: [lastSeenMessageId], references: [id], onDelete: SetNull)
+
+  messages Message[] @relation("MemberMessages")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([conversationId, memberId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  senderId       String?
+  conversationId String
+  type           String
+  content        String[]
+
+  sender       ConversationMember? @relation("MemberMessages", fields: [senderId], references: [id], onDelete: SetNull)
+  conversation Conversation        @relation("ConversationMessages", fields: [conversationId], references: [id], onDelete: Cascade)
+
+  isLastMessageOfConversation Conversation?        @relation("ConversationLastMessage")
+  isLastSeenByMember          ConversationMember[] @relation("MemberLastSeenMessage")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId])
 }

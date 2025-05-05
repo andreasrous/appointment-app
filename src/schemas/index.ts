@@ -2,6 +2,16 @@ import { startOfDay } from "date-fns";
 import { Day, UserRole } from "@prisma/client";
 import { z } from "zod";
 
+export const MessageSchema = z.object({
+  conversationId: z.string(),
+  type: z.string(),
+  content: z.array(z.string().min(1, "Message cannot be empty")),
+});
+
+export const ConversationSchema = z.object({
+  businessId: z.string().min(1, "Please select a business."),
+});
+
 export const BookingSchema = z.object({
   description: z.optional(
     z.string().max(500, "Description is too long").nullable()

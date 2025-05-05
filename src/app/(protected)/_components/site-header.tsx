@@ -18,12 +18,10 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-function formatSegment(segment: string, businessName?: string): string {
+function formatSegment(segment: string): string {
   const isId = /^[a-f\d]{24}$|^[\w-]{36}$|^c[a-z0-9]{24}$/i.test(segment);
 
-  if (isId) {
-    return businessName || "Form";
-  }
+  if (isId) return "";
 
   return segment
     .split("-")
@@ -31,28 +29,29 @@ function formatSegment(segment: string, businessName?: string): string {
     .join(" ");
 }
 
-interface SiteHeaderProps {
-  businessName?: string;
-}
-
-export function SiteHeader({ businessName }: SiteHeaderProps) {
+export function SiteHeader() {
   const user = useCurrentUser();
   const pathname = usePathname();
 
   const segments = pathname.split("/").filter(Boolean);
 
-  const breadcrumbItems = segments.map((segment, index) => {
-    const href = "/" + segments.slice(0, index + 1).join("/");
-    const label = formatSegment(segment, businessName);
-    const isLast = index === segments.length - 1;
+  const breadcrumbSegments = segments
+    .map((segment, index) => {
+      const href = "/" + segments.slice(0, index + 1).join("/");
+      const label = formatSegment(segment);
+      return label ? { href, label } : null;
+    })
+    .filter(Boolean) as { href: string; label: string }[];
 
+  const breadcrumbItems = breadcrumbSegments.map((segment, index) => {
+    const isLast = index === breadcrumbSegments.length - 1;
     return (
-      <React.Fragment key={href}>
+      <React.Fragment key={segment.href}>
         <BreadcrumbItem>
           {isLast ? (
-            <BreadcrumbPage>{label}</BreadcrumbPage>
+            <BreadcrumbPage>{segment.label}</BreadcrumbPage>
           ) : (
-            <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+            <BreadcrumbLink href={segment.href}>{segment.label}</BreadcrumbLink>
           )}
         </BreadcrumbItem>
         {!isLast && <BreadcrumbSeparator />}

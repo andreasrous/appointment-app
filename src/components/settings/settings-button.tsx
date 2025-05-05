@@ -9,15 +9,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+import { useState } from "react";
 import { userNavigation } from "@/config/navigation";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { SettingsForm } from "@/components/settings/settings-form";
 
 export function SettingsButton() {
+  const [open, setOpen] = useState(false);
   const item = userNavigation.find((item) => item.name === "Settings");
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <DropdownMenuItem
           className="cursor-pointer hover:bg-accent"
@@ -35,7 +37,7 @@ export function SettingsButton() {
           <DialogTitle className="text-2xl">Settings</DialogTitle>
           <DialogDescription>Manage your account settings!</DialogDescription>
         </DialogHeader>
-        <SettingsForm />
+        <SettingsForm onSuccess={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );

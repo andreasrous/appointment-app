@@ -40,7 +40,11 @@ import {
 
 import { UploadDropzone } from "@/lib/uploadthing";
 
-export const SettingsForm = () => {
+interface SettingsFormProps {
+  onSuccess?: () => void;
+}
+
+export const SettingsForm = ({ onSuccess }: SettingsFormProps) => {
   const user = useCurrentUser();
   const { update } = useSession();
   const [isPending, startTransition] = useTransition();
@@ -84,6 +88,7 @@ export const SettingsForm = () => {
             toast.success(data.success);
             form.resetField("password");
             form.resetField("newPassword");
+            onSuccess?.();
           }
         })
         .catch(() => toast.error("Something went wrong!"));

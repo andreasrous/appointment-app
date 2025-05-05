@@ -56,6 +56,72 @@ export const getAllBusinesses = async () => {
   }
 };
 
+export const getAllOtherBusinesses = async () => {
+  try {
+    const user = await getCurrentUser();
+
+    const userConversationMemberships = await db.conversationMember.findMany({
+      where: {
+        memberId: user?.id,
+      },
+      select: {
+        conversationId: true,
+      },
+    });
+
+    const userConversationIds = userConversationMemberships.map(
+      (m) => m.conversationId
+    );
+
+    const conversationsWithBusinesses = await db.conversation.findMany({
+      where: {
+        id: {
+          in: userConversationIds,
+        },
+      },
+      include: {
+        members: {
+          include: {
+            member: {
+              select: {
+                id: true,
+                business: {
+                  select: { id: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const businessIdsInConversation = new Set<string>();
+    for (const conversation of conversationsWithBusinesses) {
+      for (const member of conversation.members) {
+        const businessId = member.member.business?.id;
+        if (businessId && member.member.id !== user?.id) {
+          businessIdsInConversation.add(businessId);
+        }
+      }
+    }
+
+    const businesses = await db.business.findMany({
+      where: {
+        ownerId: {
+          not: user?.id,
+        },
+        id: {
+          notIn: Array.from(businessIdsInConversation),
+        },
+      },
+    });
+
+    return businesses;
+  } catch {
+    return [];
+  }
+};
+
 export const getFavoriteBusinesses = async () => {
   const user = await getCurrentUser();
 

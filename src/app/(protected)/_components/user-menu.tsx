@@ -1,6 +1,5 @@
 "use client";
 
-import { FaUser } from "react-icons/fa";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -30,9 +29,7 @@ export function UserMenu({ user }: UserMenuProps) {
             src={user?.image ?? undefined}
             alt={user?.name ?? undefined}
           />
-          <AvatarFallback className="bg-primary rounded-full">
-            <FaUser className="text-white" />
-          </AvatarFallback>
+          <AvatarFallback>{user?.name?.substring(0, 1)}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -48,8 +45,8 @@ export function UserMenu({ user }: UserMenuProps) {
                 src={user?.image ?? undefined}
                 alt={user?.name ?? undefined}
               />
-              <AvatarFallback className="bg-primary rounded-lg">
-                <FaUser className="text-white" />
+              <AvatarFallback className="rounded-lg">
+                {user?.name?.substring(0, 1)}
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">

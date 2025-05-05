@@ -1,5 +1,7 @@
+import { ConversationFallback } from "@/components/messages/conversation-fallback";
+
 const MessagesPage = () => {
-  return <div>Messages</div>;
+  return <ConversationFallback />;
 };
 
 export default MessagesPage;

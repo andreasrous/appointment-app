@@ -141,8 +141,6 @@ export const BookingForm = ({
       ])
     ) as z.infer<typeof BookingSchema>;
 
-    console.log(values.employeeId);
-
     startTransition(() => {
       createBooking(processedValues)
         .then((data) => {
