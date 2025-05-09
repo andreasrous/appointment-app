@@ -8,7 +8,7 @@ import {
 } from "@/data/conversations";
 
 interface ConversationPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const ConversationPage = async ({ params }: ConversationPageProps) => {

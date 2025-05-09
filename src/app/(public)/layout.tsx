@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { Header } from "./_components/header";
 
 interface PublicLayoutProps {
   children: React.ReactNode;
@@ -11,7 +12,10 @@ const PublicLayout = async ({ children }: PublicLayoutProps) => {
       forcedTheme="light"
       disableTransitionOnChange
     >
-      {children}
+      <main className="container mx-auto">
+        <Header />
+        {children}
+      </main>
     </ThemeProvider>
   );
 };

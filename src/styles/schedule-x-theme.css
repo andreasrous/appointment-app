@@ -83,6 +83,7 @@
 
 .sx__calendar {
   border: none;
+  border-radius: 0;
   padding: 1rem;
 }
 
