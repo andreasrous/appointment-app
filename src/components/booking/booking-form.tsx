@@ -4,19 +4,18 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { BookingSchema } from "@/schemas";
-import { createBooking, getValidTimes } from "@/actions/booking";
+import { getValidTimes } from "@/actions/booking";
 
 import { Availability, Business, Employee, Service } from "@prisma/client";
 
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 
 import {
   Card,
@@ -50,7 +49,7 @@ import {
 } from "@/components/ui/popover";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { BookButton } from "./book-button";
 
 interface BookingFormProps {
   business: Business;
@@ -65,8 +64,6 @@ export const BookingForm = ({
   availabilities,
   employeesByService,
 }: BookingFormProps) => {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const [availableTimes, setAvailableTimes] = useState<Date[]>([]);
 
@@ -81,6 +78,12 @@ export const BookingForm = ({
       employeeId: undefined,
     },
   });
+
+  const isFormValid =
+    !!selectedServiceId &&
+    !!form.watch("employeeId") &&
+    !!form.watch("date") &&
+    !!form.watch("startTime");
 
   const selectedDate = form.watch("date");
 
@@ -133,29 +136,6 @@ export const BookingForm = ({
     return dateFormatter.format(date);
   };
 
-  const onSubmit = (values: z.infer<typeof BookingSchema>) => {
-    const processedValues = Object.fromEntries(
-      Object.entries(values).map(([key, value]) => [
-        key,
-        value === "" ? null : value,
-      ])
-    ) as z.infer<typeof BookingSchema>;
-
-    startTransition(() => {
-      createBooking(processedValues)
-        .then((data) => {
-          if (data.error) {
-            toast.error(data.error);
-          }
-
-          if (data.success) {
-            router.push("/booking/success");
-          }
-        })
-        .catch(() => toast.error("Something went wrong!"));
-    });
-  };
-
   return (
     <div className="flex w-full h-full flex-1 items-center justify-center">
       <Card className="w-md">
@@ -167,7 +147,7 @@ export const BookingForm = ({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+            <form className="space-y-6">
               <div className="space-y-6">
                 <FormField
                   control={form.control}
@@ -176,7 +156,6 @@ export const BookingForm = ({
                     <FormItem>
                       <FormLabel>Service*</FormLabel>
                       <Select
-                        disabled={isPending}
                         onValueChange={(value) => {
                           field.onChange(value);
                           setSelectedServiceId(value);
@@ -214,7 +193,7 @@ export const BookingForm = ({
                     <FormItem>
                       <FormLabel>Employee*</FormLabel>
                       <Select
-                        disabled={isPending || !selectedServiceId}
+                        disabled={!selectedServiceId}
                         onValueChange={field.onChange}
                         value={field.value}
                       >
@@ -250,7 +229,6 @@ export const BookingForm = ({
                               <Button
                                 variant="outline"
                                 disabled={
-                                  isPending ||
                                   !selectedServiceId ||
                                   !form.watch("employeeId")
                                 }
@@ -291,7 +269,7 @@ export const BookingForm = ({
                       <FormItem className="flex-1">
                         <FormLabel>Time*</FormLabel>
                         <Select
-                          disabled={isPending || !form.watch("date")}
+                          disabled={!form.watch("date")}
                           onValueChange={(value) =>
                             field.onChange(new Date(value))
                           }
@@ -339,7 +317,6 @@ export const BookingForm = ({
                         <Textarea
                           {...field}
                           value={field.value ?? ""}
-                          disabled={isPending}
                           placeholder="Optional notes about the appointment"
                         />
                       </FormControl>
@@ -349,26 +326,20 @@ export const BookingForm = ({
                 />
               </div>
               <div className="flex gap-2 justify-end">
-                <Button type="submit" disabled={isPending}>
-                  {isPending && <Loader2 className="size-4 animate-spin" />}
-                  {selectedService ? (
-                    <span>
-                      {selectedService.price.toLocaleString("el-GR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      €
-                    </span>
-                  ) : (
-                    <span>Book</span>
-                  )}
-                </Button>
+                <BookButton
+                  selectedService={selectedService}
+                  isFormValid={isFormValid}
+                  formValues={{
+                    description: form.watch("description") ?? "",
+                    businessId: business.id,
+                    startTime: form.watch("startTime"),
+                    date: form.watch("date"),
+                    serviceId: form.watch("serviceId"),
+                    employeeId: form.watch("employeeId"),
+                  }}
+                />
                 <Link href="/search">
-                  <Button
-                    variant="destructive"
-                    type="button"
-                    disabled={isPending}
-                  >
+                  <Button variant="destructive" type="button">
                     Cancel
                   </Button>
                 </Link>

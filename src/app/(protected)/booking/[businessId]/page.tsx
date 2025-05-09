@@ -9,7 +9,7 @@ import { getServicesWithEmployeesByBusinessId } from "@/data/service";
 import { getAvailabilitiesByBusinessId } from "@/data/availability";
 
 interface BookingPageProps {
-  params: { businessId: string };
+  params: Promise<{ businessId: string }>;
 }
 
 const BookingPage = async ({ params }: BookingPageProps) => {

@@ -32,6 +32,8 @@ export const onboardingRoutes = ["/onboarding"];
 export const middlewareIgnoreRoutes = [
   "/api/uploadthing",
   "/api/oauth/exchange",
+  "/api/webhooks/stripe",
+  "/api/payment",
 ];
 
 /**

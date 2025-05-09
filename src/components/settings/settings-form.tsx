@@ -10,7 +10,6 @@ import { useSession } from "next-auth/react";
 import { useState, useTransition } from "react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
-import { UserRole } from "@prisma/client";
 import { SettingsSchema } from "@/schemas";
 import { settings } from "@/actions/settings";
 
@@ -30,13 +29,6 @@ import {
   FormDescription,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { UploadDropzone } from "@/lib/uploadthing";
 
@@ -174,34 +166,6 @@ export const SettingsForm = ({ onSuccess }: SettingsFormProps) => {
               />
             </>
           )}
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role</FormLabel>
-                <Select
-                  disabled={isPending}
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
-                  <FormControl className="w-full">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
-                    <SelectItem value={UserRole.BUSINESS_OWNER}>
-                      Business Owner
-                    </SelectItem>
-                    <SelectItem value={UserRole.USER}>User</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           {user?.isOAuth === false && (
             <FormField
               control={form.control}

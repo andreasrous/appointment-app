@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { ExtendedUser } from "@/types/next-auth";
-import { UpgradeButton } from "@/components/upgrade/upgrade-button";
+import { UpgradeModal } from "@/components/upgrade/upgrade-modal";
 import { SettingsButton } from "@/components/settings/settings-button";
 import { BillingButton } from "@/components/billing/billing-button";
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -57,7 +57,7 @@ export function UserMenu({ user }: UserMenuProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <UpgradeButton />
+          <UpgradeModal />
           <SettingsButton />
           <BillingButton />
           <DropdownMenuSeparator />

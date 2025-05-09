@@ -312,7 +312,7 @@ export function DataTable({
   }
 
   return (
-    <Card className="h-full">
+    <Card>
       <CardContent>
         <Tabs
           defaultValue="outline"
