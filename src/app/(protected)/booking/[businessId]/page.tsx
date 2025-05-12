@@ -1,5 +1,3 @@
-import * as motion from "motion/react-client";
-
 import { notFound } from "next/navigation";
 
 import { Employee } from "@prisma/client";
@@ -28,19 +26,14 @@ const BookingPage = async ({ params }: BookingPageProps) => {
   }, {} as Record<string, Employee[]>);
 
   return (
-    <motion.div
-      className="h-full p-4 sm:p-16"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <div className="h-full p-4 sm:p-16">
       <BookingForm
         business={business}
         services={services}
         availabilities={availabilities}
         employeesByService={employeesByService}
       />
-    </motion.div>
+    </div>
   );
 };
 

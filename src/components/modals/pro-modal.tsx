@@ -18,11 +18,11 @@ export const ProModal = () => {
         <div className="aspect-video relative flex items-center justify-center">
           <Image src="/hero.jpg" alt="Hero" className="object-cover" fill />
         </div>
-        <div className="text-neutral-700 space-y-6 p-6 pt-2">
+        <div className="space-y-6 p-6 pt-2">
           <h2 className="font-semibold text-xl">
             Unlock the Full Power of Schedio
           </h2>
-          <p className="text-sm font-semibold text-neutral-600">
+          <p className="text-sm font-semibold">
             Upgrade to Schedio Pro and take control of your business scheduling.
           </p>
           <div className="pl-3">

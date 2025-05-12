@@ -133,6 +133,8 @@ model Business {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
 }
 
 model Availability {
@@ -146,6 +148,8 @@ model Availability {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([businessId])
 }
 
 model Service {
@@ -163,6 +167,8 @@ model Service {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([businessId])
 }
 
 model Employee {
@@ -176,6 +182,8 @@ model Employee {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([businessId])
 }
 
 model EmployeeService {
@@ -212,6 +220,10 @@ model Appointment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([businessId])
+  @@index([startTime])
 }
 
 model Favorite {
@@ -222,6 +234,8 @@ model Favorite {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@unique([userId, businessId])
+  @@index([userId])
+  @@index([businessId])
 }
 
 model Conversation {
@@ -252,6 +266,8 @@ model ConversationMember {
   updatedAt DateTime @updatedAt
 
   @@unique([conversationId, memberId])
+  @@index([memberId])
+  @@index([conversationId])
 }
 
 model Message {
@@ -271,4 +287,5 @@ model Message {
   updatedAt DateTime @updatedAt
 
   @@index([conversationId])
+  @@index([createdAt])
 }

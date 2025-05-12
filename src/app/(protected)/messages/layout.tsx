@@ -1,5 +1,3 @@
-import * as motion from "motion/react-client";
-
 import { Loader2 } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/user";
@@ -19,12 +17,7 @@ const MessagesLayout = async ({ children }: MessagesLayoutProps) => {
   const conversations = await getConversationsByMemberId(user?.id as string);
 
   return (
-    <motion.div
-      className="relative -m-4 p-4 h-[calc(100%+2rem)] w-[calc(100%+2rem)] flex gap-4 bg-background"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <div className="relative -m-4 p-4 h-[calc(100%+2rem)] w-[calc(100%+2rem)] flex gap-4 bg-background">
       <ConversationsList businesses={businesses}>
         {conversations ? (
           conversations.length === 0 ? (
@@ -49,7 +42,7 @@ const MessagesLayout = async ({ children }: MessagesLayoutProps) => {
         )}
       </ConversationsList>
       {children}
-    </motion.div>
+    </div>
   );
 };
 

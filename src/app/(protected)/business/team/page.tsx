@@ -1,5 +1,3 @@
-import * as motion from "motion/react-client";
-
 import { getCurrentRole, getCurrentUser } from "@/lib/user";
 import { getBusinessByOwnerId } from "@/data/business";
 import { getEmployeesByBusinessId } from "@/data/employee";
@@ -17,12 +15,7 @@ const TeamPage = async () => {
   const employees = await getEmployeesByBusinessId(business?.id as string);
 
   return (
-    <motion.div
-      className="h-full"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <div className="h-full">
       {role !== UserRole.BUSINESS_OWNER && <ProModal />}
       <RoleGate allowedRole={UserRole.BUSINESS_OWNER}>
         {business ? (
@@ -36,7 +29,7 @@ const TeamPage = async () => {
           />
         )}
       </RoleGate>
-    </motion.div>
+    </div>
   );
 };
 

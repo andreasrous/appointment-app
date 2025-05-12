@@ -11,7 +11,6 @@ import {
 } from "@/data/appointment";
 import { getFavoriteBusinesses } from "@/data/business";
 import { UserRole } from "@prisma/client";
-import * as motion from "motion/react-client";
 
 const DashboardPage = async () => {
   const data = await getAppointmentsForTable();
@@ -22,12 +21,7 @@ const DashboardPage = async () => {
   const favoriteBusinesses = await getFavoriteBusinesses();
 
   return (
-    <motion.div
-      className="h-full flex flex-col gap-4"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <div className="h-full flex flex-col gap-4">
       <RoleGate allowedRole={UserRole.BUSINESS_OWNER}>
         <SectionCards
           totalRevenue={totalRevenue}
@@ -38,7 +32,7 @@ const DashboardPage = async () => {
       </RoleGate>
       <FavoriteBusinesses businesses={favoriteBusinesses} />
       <DataTable data={data} />
-    </motion.div>
+    </div>
   );
 };
 

@@ -1,5 +1,3 @@
-import * as motion from "motion/react-client";
-
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,11 +5,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 const SuccessPage = () => {
   return (
-    <motion.div
+    <div
       className="h-full p-4 sm:p-16"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
       style={
         {
           "--bg": "hsl(143,85%,96%)",
@@ -42,7 +37,7 @@ const SuccessPage = () => {
           </CardFooter>
         </Card>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
