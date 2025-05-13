@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/user";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
+
+const timeZone = process.env.TIMEZONE!;
 
 const autoCompleteAppointments = async (userId: string) => {
   const now = new Date();
@@ -55,8 +57,12 @@ export const getAppointmentsByUserId = async (userId: string) => {
       title: appointment.title,
       description: appointment.description ?? undefined,
       location: appointment.location ?? undefined,
-      start: format(appointment.startTime, "yyyy-MM-dd HH:mm"),
-      end: format(appointment.endTime, "yyyy-MM-dd HH:mm"),
+      start: formatInTimeZone(
+        appointment.startTime,
+        timeZone,
+        "yyyy-MM-dd HH:mm"
+      ),
+      end: formatInTimeZone(appointment.endTime, timeZone, "yyyy-MM-dd HH:mm"),
     }));
   } catch {
     return null;
@@ -81,7 +87,7 @@ export const getAppointmentsForTable = async () => {
     },
     distinct: ["id"],
     orderBy: {
-      startTime: "asc",
+      createdAt: "desc",
     },
     include: {
       business: true,
@@ -102,7 +108,11 @@ export const getAppointmentsForTable = async () => {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }) + " €",
-    date: format(appointment.startTime, "yyyy-MM-dd h:mm a"),
+    date: formatInTimeZone(
+      appointment.startTime,
+      timeZone,
+      "yyyy-MM-dd h:mm a"
+    ),
     employee: appointment.employee.name,
   }));
 };

@@ -23,11 +23,6 @@ export const BillingForm = ({ subscriptionPlan }: BillingFormProps) => {
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async () => {
-    if (subscriptionPlan.isSubscribed) {
-      toast.success("You’re already subscribed to the PRO plan.");
-      return;
-    }
-
     startTransition(() => {
       createStripeSession().catch(() =>
         toast.error("There was a problem... Please try again in a moment.")

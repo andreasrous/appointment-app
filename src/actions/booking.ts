@@ -6,17 +6,13 @@ import { Day } from "@prisma/client";
 
 import { BookingSchema } from "@/schemas";
 import { getCurrentUser } from "@/lib/user";
-import {
-  addMinutes,
-  format,
-  fromUnixTime,
-  isAfter,
-  isBefore,
-  parse,
-} from "date-fns";
+import { fromZonedTime, getTimezoneOffset } from "date-fns-tz";
+import { addMinutes, format, fromUnixTime, isAfter, isBefore } from "date-fns";
 import { nylas } from "@/lib/nylas";
 import { GetFreeBusyResponse, NylasResponse } from "nylas";
 import { getBusinessById } from "@/data/business";
+
+const timeZone = process.env.TIMEZONE!;
 
 export const createBooking = async (values: z.infer<typeof BookingSchema>) => {
   const validatedFields = BookingSchema.safeParse(values);
@@ -156,15 +152,18 @@ export const getValidTimes = async (
   businessId: string,
   duration: number
 ) => {
+  const offset = getTimezoneOffset(timeZone, selectedDate);
+  const adjustedDate = new Date(selectedDate.getTime() + offset);
+
   const currentDay = format(
-    selectedDate,
+    adjustedDate,
     "EEEE"
   ).toUpperCase() as keyof typeof Day;
 
-  const startOfDay = new Date(selectedDate);
+  const startOfDay = new Date(adjustedDate);
   startOfDay.setHours(0, 0, 0, 0);
 
-  const endOfDay = new Date(selectedDate);
+  const endOfDay = new Date(adjustedDate);
   endOfDay.setHours(23, 59, 59, 999);
 
   const data = await db.availability.findFirst({
@@ -201,14 +200,13 @@ export const getValidTimes = async (
     },
   });
 
-  const formattedDate = format(selectedDate, "yyyy-MM-dd");
   const dbAvailability = {
     startTime: data?.startTime,
     endTime: data?.endTime,
   };
 
   const freeSlots = getFreeTimeSlots({
-    selectedDate: formattedDate,
+    selectedDate: format(adjustedDate, "yyyy-MM-dd"),
     dbAvailability,
     nylasData,
     duration,
@@ -235,16 +233,14 @@ function getFreeTimeSlots({
 }: getFreeTimeSlotsProps) {
   const now = new Date();
 
-  const availableFrom = parse(
+  const availableFrom = fromZonedTime(
     `${selectedDate} ${dbAvailability.startTime}`,
-    "yyyy-MM-dd HH:mm",
-    new Date()
+    timeZone
   );
 
-  const availableTill = parse(
+  const availableTill = fromZonedTime(
     `${selectedDate} ${dbAvailability.endTime}`,
-    "yyyy-MM-dd HH:mm",
-    new Date()
+    timeZone
   );
 
   type MyFreeBusyResponse = {
