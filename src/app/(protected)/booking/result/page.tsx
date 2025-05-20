@@ -41,6 +41,7 @@ const BookingResultPage = async ({ searchParams }: BookingResultPageProps) => {
         startTime: new Date(startTime),
         date: new Date(date),
         description: description || null,
+        paymentIntentId: session.payment_intent as string,
       });
 
       if (result?.error) {

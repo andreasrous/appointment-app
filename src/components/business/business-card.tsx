@@ -48,7 +48,7 @@ export const BusinessCard = ({
   };
 
   return (
-    <div className="min-w-3xs flex flex-col gap-2 rounded-xl border bg-background p-4 shadow-sm">
+    <div className="min-w-3xs flex flex-col gap-2 rounded-xl border bg-background p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 h-12">
           {business.logo ? (

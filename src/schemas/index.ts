@@ -21,6 +21,7 @@ export const BookingSchema = z.object({
   businessId: z.string(),
   serviceId: z.string(),
   employeeId: z.string(),
+  paymentIntentId: z.optional(z.string().nullable()),
 });
 
 export const EmployeeSchema = z.object({

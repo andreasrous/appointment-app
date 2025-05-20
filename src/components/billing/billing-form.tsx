@@ -37,7 +37,7 @@ export const BillingForm = ({ subscriptionPlan }: BillingFormProps) => {
         handleSubmit();
       }}
     >
-      <Card className="w-full max-w-xl p-6 space-y-4">
+      <Card className="w-full max-w-lg space-y-4 pb-0">
         <CardHeader className="space-y-1">
           <CardTitle className="text-xl font-semibold">
             Subscription Plan
@@ -50,7 +50,7 @@ export const BillingForm = ({ subscriptionPlan }: BillingFormProps) => {
             plan.
           </CardDescription>
         </CardHeader>
-        <CardFooter className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-4 border-t">
+        <CardFooter className="flex flex-col md:flex-row md:items-center md:justify-between bg-muted dark:bg-black/40 dark:border-t gap-4 py-4 rounded-b-xl">
           <Button
             type="submit"
             className="w-full md:w-auto"

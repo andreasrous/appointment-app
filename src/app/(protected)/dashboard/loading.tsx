@@ -31,7 +31,7 @@ const Loading = () => {
         <div className="max-h-[200px] overflow-hidden grid auto-rows-min gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, idx) => (
             <div key={idx} className="flex h-[200px] w-full bg-background">
-              <div className="min-w-3xs flex flex-col gap-2 rounded-xl border bg-background p-4 shadow-xs">
+              <div className="min-w-3xs flex flex-col gap-2 rounded-xl border bg-background p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 h-12">
                     <Skeleton className="h-12 w-12 rounded-lg" />

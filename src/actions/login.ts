@@ -13,7 +13,6 @@ import { signIn } from "@/lib/auth";
 import { LoginSchema } from "@/schemas";
 import { DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
 
-import { downgradeIfNotSubscribed } from "@/lib/subscription-check";
 import { sendVerificationEmail, sendTwoFactorTokenEmail } from "@/lib/mail";
 import {
   generateVerificationToken,
@@ -46,8 +45,6 @@ export const login = async (
   if (!isPasswordCorrect) {
     return { error: "Invalid credentials!" };
   }
-
-  await downgradeIfNotSubscribed(existingUser.id, existingUser.role);
 
   if (!existingUser.emailVerified) {
     const verificationToken = await generateVerificationToken(

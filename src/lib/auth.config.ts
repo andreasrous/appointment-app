@@ -11,7 +11,6 @@ import { LoginSchema } from "@/schemas";
 import { getAccountByUserId } from "@/data/account";
 import { getUserByEmail, getUserById } from "@/data/user";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
-import { downgradeIfNotSubscribed } from "@/lib/subscription-check";
 
 export default {
   providers: [
@@ -57,8 +56,6 @@ export default {
       const existingUser = await getUserById(user.id);
 
       if (!existingUser) return false;
-
-      await downgradeIfNotSubscribed(existingUser.id, existingUser.role);
 
       // Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false;

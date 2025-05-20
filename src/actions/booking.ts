@@ -1,15 +1,17 @@
 "use server";
 
 import { z } from "zod";
-import { db } from "@/lib/db";
+import { addMinutes, format, fromUnixTime, isAfter, isBefore } from "date-fns";
+import { fromZonedTime, getTimezoneOffset } from "date-fns-tz";
+import { GetFreeBusyResponse, NylasResponse } from "nylas";
 import { Day } from "@prisma/client";
 
-import { BookingSchema } from "@/schemas";
-import { getCurrentUser } from "@/lib/user";
-import { fromZonedTime, getTimezoneOffset } from "date-fns-tz";
-import { addMinutes, format, fromUnixTime, isAfter, isBefore } from "date-fns";
+import { db } from "@/lib/db";
 import { nylas } from "@/lib/nylas";
-import { GetFreeBusyResponse, NylasResponse } from "nylas";
+import { stripe } from "@/lib/stripe";
+import { getCurrentUser } from "@/lib/user";
+
+import { BookingSchema } from "@/schemas";
 import { getBusinessById } from "@/data/business";
 
 const timeZone = process.env.TIMEZONE!;
@@ -27,8 +29,14 @@ export const createBooking = async (values: z.infer<typeof BookingSchema>) => {
     return { error: "Unauthorized" };
   }
 
-  const { serviceId, businessId, employeeId, startTime, description } =
-    validatedFields.data;
+  const {
+    serviceId,
+    businessId,
+    employeeId,
+    startTime,
+    description,
+    paymentIntentId,
+  } = validatedFields.data;
 
   try {
     const service = await db.service.findUnique({
@@ -89,11 +97,13 @@ export const createBooking = async (values: z.infer<typeof BookingSchema>) => {
         serviceId,
         employeeId,
         calendarEventId: nylasEvent.data.id,
+        paymentIntentId,
       },
     });
 
     return { success: "Appointment booked!" };
-  } catch {
+  } catch (error) {
+    console.error(error);
     return { error: "Failed to book appointment." };
   }
 };
@@ -105,6 +115,7 @@ export const cancelAppointment = async (id: string) => {
       select: {
         id: true,
         calendarEventId: true,
+        paymentIntentId: true,
         business: {
           select: {
             owner: {
@@ -134,6 +145,12 @@ export const cancelAppointment = async (id: string) => {
         notifyParticipants: true,
       },
     });
+
+    if (appointment.paymentIntentId) {
+      await stripe.refunds.create({
+        payment_intent: appointment.paymentIntentId,
+      });
+    }
 
     await db.appointment.update({
       where: { id },
