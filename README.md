@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Schedio – Appointment Scheduling Platform
 
-## Getting Started
+Schedio is a full-featured appointment scheduling platform that allows users to seamlessly book appointments with businesses. It supports online payments, calendar integration, and built-in chat functionality, making it a modern solution for both customers and service providers.
 
-First, run the development server:
+**Live Demo:** [schediobooking.com](https://schediobooking.com)
+
+## Features
+
+### For Users (Free Plan)
+
+- **Book Appointments**: Schedule appointments with businesses using an intuitive booking form.
+- **Online Payments**: Pay securely online via Stripe.
+- **Email Notifications**: Receive instant email confirmations when booking an appointment.
+- **Calendar Integration**: View appointments in both the in-app calendar and external calendars (Google or Microsoft).
+- **Favorites**: Add businesses to a personal favorites list for quick access.
+- **Appointment Management**: Cancel appointments and receive refunds automatically.
+- **Chat Support**: Engage in real-time conversations with businesses through the built-in chat feature.
+
+### For Businesses (Pro Plan – 49€/month)
+
+Everything users can do, plus:
+
+- **Business Registration**: Create and manage a detailed business profile.
+- **Service & Staff Management**: Add services and assign employees to them.
+- **Working Hours**: Define and customize weekly availability for appointments.
+- **Dashboard Analytics**:
+  - Total revenue
+  - Number of confirmed, completed, and cancelled appointments
+- **Subscription Control**: Cancel or renew the Pro Plan subscription at any time.
+
+---
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Authentication**: [Auth.js](https://authjs.dev/)
+- **Database**: [Supabase](https://supabase.com/)
+- **Payments**: [Stripe](https://stripe.com/)
+- **Emails**: [Resend](https://resend.com/)
+- **File Uploads**: [UploadThing](https://uploadthing.com/)
+- **Calendar Sync**: [Nylas](https://www.nylas.com/)
+- **Deployment**: [Vercel](https://vercel.com/)
+
+---
+
+## Screenshots
+
+## ![alt text](public/dashboard-preview.png)
+
+## Installation & Development
+
+> Note: This project is deployed and actively maintained. For local development:
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/andreasrous/appointment-app.git
+cd appointment-app
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up environment variables
+cp .env.example .env
+# Fill in values for Supabase, Stripe, Resend, Nylas, etc.
+
+# 4. Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Author
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Andreas Rousounelos**  
+GitHub: [@andreasrous](https://github.com/andreasrous)
